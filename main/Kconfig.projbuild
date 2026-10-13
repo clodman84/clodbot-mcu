@@ -1,0 +1,21 @@
+menu "WiFi Configuration"
+
+    config ESP_WIFI_SSID
+        string "WiFi SSID"
+        default "clodphone"
+        help
+            SSID (network name) to connect to.
+
+    config ESP_WIFI_PASSWORD
+        string "WiFi Password"
+        default "thanks4wifi"
+        help
+            WiFi password (WPA or WPA2) to use.
+
+    config ESP_WIFI_MAX_RETRY
+        int "Maximum retry"
+        default 5
+        help
+            Max retries before giving up on connecting to the AP.
+
+endmenu

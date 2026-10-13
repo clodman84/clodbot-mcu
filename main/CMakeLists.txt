@@ -1,0 +1,16 @@
+idf_component_register(
+    SRCS
+        "clodbot-mcu.c"
+        "core/internet.c"
+        "core/ui.c"
+	"core/websocket.c"
+    INCLUDE_DIRS
+        "."
+        "core/include"
+    REQUIRES
+        esp_wifi
+        esp_event
+        esp_netif
+        nvs_flash
+	esp_timer
+)
