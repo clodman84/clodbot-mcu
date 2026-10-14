@@ -24,7 +24,7 @@ app_main (void)
       ESP_LOGE (TAG, "wifi connect failed, halting");
       return;
     }
-
   ui_subscribe_internet ();
   ws_start ();
+  ui_subscribe_websocket();
 }
