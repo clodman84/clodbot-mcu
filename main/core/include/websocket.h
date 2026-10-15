@@ -44,7 +44,7 @@ extern "C"
    * @param timeout_ms Max time to wait, or portMAX_DELAY to wait forever.
    * @return true if connected within timeout, false otherwise
    * */
-  bool      internet_wait_connected (uint32_t timeout_ms);
+  bool      websocket_wait_connected(uint32_t timeout_ms);
 
   esp_err_t ws_start (void);
 

@@ -1,9 +1,11 @@
+#include "audio_io.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "internet.h"
 #include "ui.h"
 #include "websocket.h"
+#include "udp_audio.h"
 
 static const char *TAG = "clodbot-mcu";
 
@@ -25,6 +27,8 @@ app_main (void)
       return;
     }
   ui_subscribe_internet ();
-  ws_start ();
-  ui_subscribe_websocket();
+  // ws_start ();
+  // ui_subscribe_websocket();
+  udp_audio_start();
+  audio_io_start();
 }

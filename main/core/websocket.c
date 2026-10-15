@@ -114,3 +114,17 @@ ws_start (void)
   esp_websocket_client_start (ws);
   return ESP_OK;
 }
+
+bool
+websocket_wait_connected(uint32_t timeout_ms)
+{
+  if (s_websocket_event_group == NULL)
+    {
+      return false;
+    }
+  TickType_t ticks =
+      (timeout_ms == portMAX_DELAY) ? portMAX_DELAY : pdMS_TO_TICKS (timeout_ms);
+  EventBits_t bits = xEventGroupWaitBits (s_websocket_event_group, WIFI_CONNECTED_BIT,
+                                          pdFALSE, pdFALSE, ticks);
+  return (bits & WIFI_CONNECTED_BIT) != 0;
+}
