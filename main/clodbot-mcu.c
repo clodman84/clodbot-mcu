@@ -12,8 +12,6 @@ static const char *TAG = "clodbot-mcu";
 void
 app_main (void)
 {
-  // ui_start() must run first: it creates the queue+task that
-  // ui_subscribe_internet()'s handler enqueues into.
   esp_err_t err = ui_start ();
   if (err != ESP_OK)
     {
@@ -27,8 +25,8 @@ app_main (void)
       return;
     }
   ui_subscribe_internet ();
-  // ws_start ();
-  // ui_subscribe_websocket();
+  ws_start ();
+  ui_subscribe_websocket();
   udp_audio_start();
   audio_io_start();
 }
