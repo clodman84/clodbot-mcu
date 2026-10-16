@@ -46,7 +46,7 @@ static void
 speaker_task (void *arg)
 {
   static int16_t    silence[FRAME_SAMPLES * 2]; // zero-initialised
-  static int16_t    st[UDP_AUDIO_MAX_PAYLOAD];  // 480 mono samples -> 960 int16
+  static int16_t    st[UDP_AUDIO_MAX_PAYLOAD];
   udp_audio_frame_t f;
   bool              playing  = false;
   uint16_t          last_seq = 0;

@@ -18,9 +18,6 @@
 #define REMOTE_PORT  8765
 #define RECONNECT_MS 2000
 #define HDR_BYTES    2
-
-// RX queue lives in PSRAM, so this can be deep without eating internal RAM
-// (24 frames = 480 ms of audio, ~23 KB).
 #define RXQ_DEPTH 24
 
 static const char       *TAG = "udp_audio";

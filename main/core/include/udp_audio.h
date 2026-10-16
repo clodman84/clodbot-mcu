@@ -11,11 +11,24 @@ extern "C"
 {
 #endif
 
-// Largest PCM payload per packet, in bytes. 2-byte header + this must stay
-// under 1472. 960 bytes = 30 ms of 16 kHz / 16-bit / mono.
-#define UDP_AUDIO_MAX_PAYLOAD 960
-// Frames buffered between the network and your audio code. Each is ~1 KB.
-#define UDP_AUDIO_QUEUE_DEPTH 24
+
+/* This block of defines is used by audio_io.c */
+#define SAMPLE_RATE           16000
+#define FRAME_MS              20
+#define FRAME_SAMPLES         (SAMPLE_RATE / 1000 * FRAME_MS) // 320
+#define MONO_BYTES            (FRAME_SAMPLES * 2)             // 640, what goes on the wire
+#define PREBUFFER             3
+#define MAX_FILL              3
+#define SPEAKER_VOL           100
+#define MIC_GAIN_DB           30.0f
+
+
+#define REMOTE_HOST  "172.20.245.8"
+#define REMOTE_PORT  8765
+#define RECONNECT_MS 2000
+#define HDR_BYTES    2
+#define RXQ_DEPTH    24
+#define UDP_AUDIO_MAX_PAYLOAD (MONO_BYTES)
 
   typedef struct
   {
