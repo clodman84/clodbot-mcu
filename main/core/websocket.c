@@ -104,7 +104,7 @@ ws_start (void)
     }
 
   esp_websocket_client_config_t cfg = {
-    .uri                  = "ws://172.20.245.8:8765",
+    .uri                  = "ws://10.39.250.8:8765",
     .buffer_size          = 4096,
     .reconnect_timeout_ms = 2000,
     .network_timeout_ms   = 5000,

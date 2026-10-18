@@ -6,6 +6,7 @@ idf_component_register(
 	"core/websocket.c"
 	"core/udp_audio.c"
 	"core/audio_io.c"
+	"core/aec.c"
     INCLUDE_DIRS
         "."
         "core/include"

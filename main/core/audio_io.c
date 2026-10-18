@@ -5,81 +5,56 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 
+#include "include/aec.h"
 #include "include/audio_io.h"
 #include "include/udp_audio.h"
 
-#define SAMPLE_RATE   16000
-#define FRAME_MS      20
-#define FRAME_SAMPLES (SAMPLE_RATE / 1000 * FRAME_MS) // 320
-#define MONO_BYTES    (FRAME_SAMPLES * 2)             // 640, what goes on the wire
-#define PREBUFFER     3
-#define MAX_FILL      3
-#define SPEAKER_VOL   100 // 100 was for the test; lower if it's loud
-#define MIC_GAIN_DB   30.0f
+#include <stdint.h>
+#include <string.h>
 
 static const char            *TAG = "audio_io";
 static esp_codec_dev_handle_t s_mic;
 static esp_codec_dev_handle_t s_spk;
 
-// Mic -> network. The codec gives interleaved stereo; the wire is mono.
 static void
-mic_task (void *arg)
+audio_task (void *arg)
 {
-  static int16_t st[FRAME_SAMPLES * 2]; // 1280 bytes
-  static int16_t mono[FRAME_SAMPLES];   // 640 bytes
-  while (1)
-    {
-      if (esp_codec_dev_read (s_mic, st, sizeof (st)) != ESP_CODEC_DEV_OK)
-        {
-          ESP_LOGE (TAG, "mic read failed");
-          vTaskDelay (pdMS_TO_TICKS (10));
-          continue;
-        }
-      for (int i = 0; i < FRAME_SAMPLES; i++)
-        mono[i] = (int16_t) (((int) st[2 * i] + (int) st[2 * i + 1]) / 2);
-      udp_audio_send (mono, sizeof (mono));
-    }
-}
-
-// Network -> speaker. Wire is mono; the codec wants interleaved stereo.
-static void
-speaker_task (void *arg)
-{
-  static int16_t    silence[FRAME_SAMPLES * 2]; // zero-initialised
-  static int16_t    st[UDP_AUDIO_MAX_PAYLOAD];
+  static int16_t    spk_st[FRAME_SAMPLES * 2];
+  static int16_t    mic_st[FRAME_SAMPLES * 2];
+  static int16_t    ref[FRAME_SAMPLES]; // what we play (mono)
+  static int16_t    mic[FRAME_SAMPLES]; // what we captured (mono)
+  static int16_t    out[FRAME_SAMPLES]; // AEC output
   udp_audio_frame_t f;
-  bool              playing  = false;
-  uint16_t          last_seq = 0;
+  bool              playing = false;
 
   while (1)
     {
-      if (! playing)
+      // Decide what to play this tick. ALWAYS produce a full frame.
+      memset (ref, 0, sizeof (ref));
+      if (! playing && udp_audio_queued () >= PREBUFFER)
+        playing = true;
+      if (playing)
         {
-          if (udp_audio_queued () < PREBUFFER)
-            {
-              vTaskDelay (pdMS_TO_TICKS (FRAME_MS));
-              continue;
-            }
-          playing = true;
+          if (udp_audio_recv (&f, 0) == ESP_OK) // timeout 0: never stall the mic
+            memcpy (ref, f.data, MIN (f.len, MONO_BYTES));
+          else
+            playing = false; // underrun: rebuffer, play silence
         }
 
-      if (udp_audio_recv (&f, 100) != ESP_OK)
-        {
-          playing = false;
-          continue;
-        }
+      // Play it
+      for (int i = 0; i < FRAME_SAMPLES; i++)
+        spk_st[2 * i] = spk_st[2 * i + 1] = ref[i];
+      esp_codec_dev_write (s_spk, spk_st, sizeof (spk_st));
 
-      int16_t gap = (int16_t) (f.seq - last_seq) - 1;
-      if (gap > 0 && last_seq != 0)
-        for (int i = 0; i < gap && i < MAX_FILL; i++)
-          esp_codec_dev_write (s_spk, silence, sizeof (silence));
-      last_seq = f.seq;
+      // Capture
+      if (esp_codec_dev_read (s_mic, mic_st, sizeof (mic_st)) != ESP_CODEC_DEV_OK)
+        continue;
+      for (int i = 0; i < FRAME_SAMPLES; i++)
+        mic[i] = (int16_t) (((int) mic_st[2 * i] + mic_st[2 * i + 1]) / 2);
 
-      const int16_t *in = (const int16_t *) f.data;
-      int            n  = f.len / 2; // mono samples
-      for (int i = 0; i < n; i++)
-        st[2 * i] = st[2 * i + 1] = in[i];
-      esp_codec_dev_write (s_spk, st, n * 4);
+      // AEC: mic + the exact frame we just played
+      aec_process (mic, ref, out);
+      udp_audio_send (out, sizeof (out));
     }
 }
 
@@ -99,17 +74,18 @@ audio_io_start (void)
     .channel         = 2, // the fix
     .sample_rate     = SAMPLE_RATE,
   };
+
   if (esp_codec_dev_open (s_mic, &fs) != ESP_CODEC_DEV_OK || esp_codec_dev_open (s_spk, &fs) != ESP_CODEC_DEV_OK)
     {
       ESP_LOGE (TAG, "codec open failed");
       return ESP_FAIL;
     }
 
+  aec_init();
   bsp_feature_enable (BSP_FEATURE_SPEAKER, true);
   esp_codec_dev_set_out_vol (s_spk, SPEAKER_VOL);
   esp_codec_dev_set_in_gain (s_mic, MIC_GAIN_DB);
 
-  xTaskCreate (mic_task, "mic", 4096, NULL, 10, NULL);
-  xTaskCreate (speaker_task, "spk", 4096, NULL, 11, NULL);
+  xTaskCreate (audio_task, "mic", 8192, NULL, 10, NULL);
   return ESP_OK;
 }

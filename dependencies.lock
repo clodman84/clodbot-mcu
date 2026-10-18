@@ -23,6 +23,16 @@ dependencies:
       registry_url: https://components.espressif.com
       type: service
     version: 0.5.3
+  espressif/esp-dsp:
+    component_hash: ed9ac175b14e0414399a2b33c525579414b5bad19a2a67b12ea212def96f9a98
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.2'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.8.2
   espressif/esp_cam_sensor:
     component_hash: 902c305b77f7c42b60fff5a084e397694f8a3fd6e6b72299996a7c856666e983
     dependencies:
@@ -325,10 +335,11 @@ dependencies:
       type: service
     version: 9.5.0
 direct_dependencies:
+- espressif/esp-dsp
 - espressif/esp_lcd_ili9341
 - espressif/esp_websocket_client
 - espressif/m5stack_core_s3
 - idf
-manifest_hash: 33a85998acd6dc26771f78f0319991e24bd722e427e2396fd78e5c41ba5e1437
+manifest_hash: a5241ea055fd59ae6ac14c04c4753177facf5a2684ce153045d2126bde92ca6a
 target: esp32s3
 version: 3.0.0

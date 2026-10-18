@@ -14,16 +14,16 @@ extern "C"
 
 /* This block of defines is used by audio_io.c */
 #define SAMPLE_RATE           16000
-#define FRAME_MS              20
-#define FRAME_SAMPLES         (SAMPLE_RATE / 1000 * FRAME_MS) // 320
-#define MONO_BYTES            (FRAME_SAMPLES * 2)             // 640, what goes on the wire
+#define FRAME_MS              16
+#define FRAME_SAMPLES         (SAMPLE_RATE / 1000 * FRAME_MS) // 256
+#define MONO_BYTES            (FRAME_SAMPLES * 2)             // 512, what goes on the wire
 #define PREBUFFER             3
 #define MAX_FILL              3
 #define SPEAKER_VOL           100
-#define MIC_GAIN_DB           30.0f
+#define MIC_GAIN_DB           60.0f
 
 
-#define REMOTE_HOST  "172.20.245.8"
+#define REMOTE_HOST  "10.39.250.8"
 #define REMOTE_PORT  8765
 #define RECONNECT_MS 2000
 #define HDR_BYTES    2

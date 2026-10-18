@@ -3949,6 +3949,35 @@ CONFIG_CU_DIAGNOSTICS_COLOR_ALWAYS=y
 # end of CMake Utilities
 
 #
+# DSP Library
+#
+# default:
+CONFIG_DSP_OPTIMIZATIONS_SUPPORTED=y
+# default:
+# CONFIG_DSP_ANSI is not set
+# default:
+CONFIG_DSP_OPTIMIZED=y
+# default:
+CONFIG_DSP_OPTIMIZATION=1
+# default:
+# CONFIG_DSP_MAX_FFT_SIZE_512 is not set
+# default:
+# CONFIG_DSP_MAX_FFT_SIZE_1024 is not set
+# default:
+# CONFIG_DSP_MAX_FFT_SIZE_2048 is not set
+# default:
+CONFIG_DSP_MAX_FFT_SIZE_4096=y
+# default:
+# CONFIG_DSP_MAX_FFT_SIZE_8192 is not set
+# default:
+# CONFIG_DSP_MAX_FFT_SIZE_16384 is not set
+# default:
+# CONFIG_DSP_MAX_FFT_SIZE_32768 is not set
+# default:
+CONFIG_DSP_MAX_FFT_SIZE=4096
+# end of DSP Library
+
+#
 # Espressif Camera Sensors Configurations
 #
 
@@ -4108,8 +4137,7 @@ CONFIG_ESP_VIDEO_ENABLE_DVP_VIDEO_DEVICE=y
 #
 # ESP WebSocket client
 #
-# default:
-# CONFIG_ESP_WS_CLIENT_ENABLE_DYNAMIC_BUFFER is not set
+CONFIG_ESP_WS_CLIENT_ENABLE_DYNAMIC_BUFFER=y
 # default:
 # CONFIG_ESP_WS_CLIENT_SEPARATE_TX_LOCK is not set
 # end of ESP WebSocket client

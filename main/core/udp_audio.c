@@ -14,12 +14,6 @@
 #include "include/internet.h"
 #include "include/udp_audio.h"
 
-#define REMOTE_HOST  "172.20.245.8"
-#define REMOTE_PORT  8765
-#define RECONNECT_MS 2000
-#define HDR_BYTES    2
-#define RXQ_DEPTH 24
-
 static const char       *TAG = "udp_audio";
 
 static SemaphoreHandle_t s_mtx; // guards s_sock, s_tx_seq, s_tx; serialises senders
