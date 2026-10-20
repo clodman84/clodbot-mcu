@@ -20,7 +20,7 @@ extern "C"
 #define PREBUFFER             3
 #define MAX_FILL              3
 #define SPEAKER_VOL           100
-#define MIC_GAIN_DB           60.0f
+#define MIC_GAIN_DB           10.0f
 
 
 #define REMOTE_HOST  "10.108.150.8"

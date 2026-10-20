@@ -26,7 +26,7 @@ static float                                x_hist[filter_length_M - 1];
 #define NORMALISATION_TERM               (1.0f / fft_len_N)
 #define STEP_SIZE_MU                     0.02f
 #define STEP_NORMALISATION_CONSTANT_BETA 0.9f
-#define EPSILON                          1e-6f // to prevent division by 0
+#define EPSILON                          1e-2f // to prevent division by 0
 
 void
 aec_init ()
@@ -59,7 +59,7 @@ calculate_power_estimate ()
     {
       float signal_power       = X_cf[i * 2] * X_cf[i * 2] + X_cf[i * 2 + 1] * X_cf[i * 2 + 1];
       float power_estimate     = STEP_NORMALISATION_CONSTANT_BETA * signal_power_estimate[i] + (1 - STEP_NORMALISATION_CONSTANT_BETA) * signal_power;
-      signal_power_estimate[i] = power_estimate;
+      signal_power_estimate[i] = fmaxf (power_estimate, signal_power); // never under-estimate on onsets
     }
 }
 
@@ -156,7 +156,7 @@ prepare_X_cf_for_next_convolution (int16_t *ref)
 }
 
 void
-aec_process (int16_t *mic,
+aec_run (int16_t *mic,
              int16_t *ref,
              int16_t *out)
 {
@@ -182,6 +182,17 @@ aec_process (int16_t *mic,
     }
   unsigned int end_b = dsp_get_cpu_cycle_count ();
 
+  static float sum_mic = 0, sum_out = 0;
+  for (int i = 0; i < input_block_length_L; i++)
+    {
+      sum_mic += (float) mic[i] * mic[i];
+      sum_out += (float) out[i] * out[i];
+    }
+
   if (iterations % 200 == 0)
-    ESP_LOGI (TAG, "AEC Process for %i takes %i cycles", fft_len_N, end_b - start_b);
+    {
+      ESP_LOGI (TAG, "AEC Process for %i takes %i cycles", fft_len_N, end_b - start_b);
+      ESP_LOGI (TAG, "ERLE %.1f dB", 10.f * log10f ((sum_mic + 1.f) / (sum_out + 1.f)));
+      sum_mic = sum_out = 0;
+    }
 }
