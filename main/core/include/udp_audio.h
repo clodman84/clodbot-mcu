@@ -23,7 +23,7 @@ extern "C"
 #define MIC_GAIN_DB           60.0f
 
 
-#define REMOTE_HOST  "10.39.250.8"
+#define REMOTE_HOST  "10.108.150.8"
 #define REMOTE_PORT  8765
 #define RECONNECT_MS 2000
 #define HDR_BYTES    2
