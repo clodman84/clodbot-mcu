@@ -49,6 +49,8 @@ static bool
 double_talk (int16_t *ref,
              int16_t *mic)
 {
+  // TODO: I have not implemented this yet, need to get at least the
+  // tone signal gone
   return false;
 }
 
@@ -66,6 +68,7 @@ calculate_power_estimate ()
 static void
 update_filter (int16_t *mic)
 {
+  // FBLMS
   // Preparing the Error signal
   for (int i = 0; i < input_block_length_L; i++)
     {
@@ -90,6 +93,7 @@ update_filter (int16_t *mic)
   calculate_power_estimate ();
 
   // add the error to the weights, we are doing unconstrained FBLMS
+  // to save on the number of FFTs we have to compute
   for (int i = 0; i < fft_len_N; i++)
     {
       H_cf[i * 2] += 2 * (STEP_SIZE_MU / (signal_power_estimate[i] + EPSILON)) * E_cf[i * 2];
@@ -116,8 +120,8 @@ apply_filter (int16_t *ref)
   dsps_bit_rev_fc32 (X_cf, fft_len_N);
 
   // Y = X * H, stored conjugated: IFFT(Y) = conj(FFT(conj(Y)))/N, so a
-  // forward FFT on conj(Y) gives the time signal (real part) without a
-  // dedicated inverse routine.
+  // forward FFT on conj(Y) gives the time signal (real part) 
+  // This is because ESP-DSP has no dedicated inverse routine
   for (int i = 0; i < fft_len_N; i++)
     {
       float xr = X_cf[i * 2], xi = X_cf[i * 2 + 1];
@@ -138,6 +142,7 @@ apply_filter (int16_t *ref)
 static void
 prepare_X_cf_for_next_convolution (int16_t *ref)
 {
+  // overlap save shenanigans
   const int H = filter_length_M - 1;
   if (H >= input_block_length_L)
     {
@@ -157,8 +162,8 @@ prepare_X_cf_for_next_convolution (int16_t *ref)
 
 void
 aec_run (int16_t *mic,
-             int16_t *ref,
-             int16_t *out)
+         int16_t *ref,
+         int16_t *out)
 {
 
   static int iterations = 0;
