@@ -26,7 +26,7 @@ extern "C"
 #define PREBUFFER    ((PREBUFFER_MS + FRAME_MS - 1) / FRAME_MS)
 #define MAX_FILL     (MAX_FILL_MS / FRAME_MS)
 
-#define REMOTE_HOST  "10.108.150.8"
+#define REMOTE_HOST  "10.69.32.8"
 #define REMOTE_PORT  8765
 #define RECONNECT_MS 2000
 #define HDR_BYTES    2

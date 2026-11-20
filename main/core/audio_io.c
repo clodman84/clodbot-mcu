@@ -109,11 +109,12 @@ calibrate_delay (void)
 static void
 audio_task (void *arg)
 {
-  static int16_t  audio_scratch[FRAME_SAMPLES * 4];
-  static int16_t *out  = &audio_scratch[FRAME_SAMPLES * 0];
-  static int16_t *ref  = &audio_scratch[FRAME_SAMPLES * 1];
-  static int16_t *mic  = &audio_scratch[FRAME_SAMPLES * 2];
-  static int16_t *dref = &audio_scratch[FRAME_SAMPLES * 3];
+  static int16_t    audio_scratch[FRAME_SAMPLES * 5];
+  static int16_t   *out     = &audio_scratch[FRAME_SAMPLES * 0];
+  static int16_t   *dref    = &audio_scratch[FRAME_SAMPLES * 1];
+  static int16_t   *mic     = &audio_scratch[FRAME_SAMPLES * 2];
+  static int16_t   *nohdres = &audio_scratch[FRAME_SAMPLES * 3];
+  static int16_t   *ref     = &audio_scratch[FRAME_SAMPLES * 4];
 
   udp_audio_frame_t f;
   bool              playing = false;
@@ -122,8 +123,8 @@ audio_task (void *arg)
   uint32_t          mic_w = 0; // samples successfully read from the mic
 
   // diagnostics, logged once a second
-  uint32_t miss = 0, underruns = 0, rebuffers = 0, trimmed = 0, frames = 0;
-  int64_t  worst_us = 0, worst_loop_us = 0, last_loop = esp_timer_get_time ();
+  uint32_t          miss = 0, underruns = 0, rebuffers = 0, trimmed = 0, frames = 0;
+  int64_t           worst_us = 0, worst_loop_us = 0, last_loop = esp_timer_get_time ();
 
   while (1)
     {
@@ -183,7 +184,7 @@ audio_task (void *arg)
 
       // ---- processing + telemetry (time it: must fit well inside FRAME_MS)
       int64_t t0 = esp_timer_get_time ();
-      aec_run (mic, dref, out);
+      aec_run (mic, dref, out, nohdres);
       udp_audio_send (audio_scratch, MONO_BYTES * 4);
       int64_t now = esp_timer_get_time ();
 
@@ -204,7 +205,7 @@ audio_task (void *arg)
                     (long long) worst_us, (long long) worst_loop_us, FRAME_MS * 1000,
                     (unsigned) st.rx_lost, (unsigned) st.rx_late, (unsigned) st.rx_overrun, (unsigned) st.rx_resync,
                     (unsigned) st.tx_dropped);
-          frames = 0;
+          frames   = 0;
           worst_us = worst_loop_us = 0;
         }
     }
